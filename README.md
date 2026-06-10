@@ -1,10 +1,21 @@
 # GDELT 시계열 이상 탐지와 LLM 검증을 활용한 위성 촬영 스케줄링 자동화 대시보드
 
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?style=flat-square&logo=duckdb&logoColor=black)
+![BigQuery](https://img.shields.io/badge/BigQuery-669DF6?style=flat-square&logo=googlebigquery&logoColor=white)
+![statsmodels](https://img.shields.io/badge/statsmodels-3F51B5?style=flat-square)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
+![Kalman Filter](https://img.shields.io/badge/Kalman_Filter-006D77?style=flat-square)
+![Gemini API](https://img.shields.io/badge/Gemini_API-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)
+![Skyfield](https://img.shields.io/badge/Skyfield-1B2A4A?style=flat-square)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+
 분쟁 지역의 군사 사건은 위성 영상으로 평가한다. 폭격 흔적이나 장비 위치 같은 물리적 증거는 은폐·위장·잔해 정리로 빠르게 사라진다. 이 짧은 관측 가능 구간(골든타임) 안에 어떤 도시를 어떤 위성으로 언제 찍을지 자동으로 산출해 판독관의 촬영 의사결정을 돕는 시스템이다.
 
 전 세계 뉴스 이벤트(GDELT)에서 도시별 칼만 필터로 일별 후보 도시를 찾고, 상위 후보의 기사 본문을 LLM이 읽어 위성 촬영 가치가 있는 물리적 분쟁인지 검증한다. 통과한 도시는 위성 궤도·기상과 결합해 촬영 후보를 뽑아 판독관 대시보드로 보여준다. 이란-미국 분쟁 시나리오로 32일 백테스트했고, 수동으로 약 5시간 걸리던 위성 촬영 의사결정을 15분 이내로 단축했다.
 
-[Notion 포트폴리오](https://sweltering-crane-02b.notion.site/GDELT-LLM-2ec96d4e0a4983eab5ee818b605b3400) · [리포트](https://drive.google.com/file/d/1D5JI0_LX6yRbazqoyO4ce3ORcImtR2Uj/view?usp=sharing) · [대시보드](https://satellite-dashboard-h875.vercel.app/)
+<a href="https://sweltering-crane-02b.notion.site/GDELT-LLM-2ec96d4e0a4983eab5ee818b605b3400" target="_blank" rel="noopener noreferrer">Notion 포트폴리오</a> · <a href="https://drive.google.com/file/d/1D5JI0_LX6yRbazqoyO4ce3ORcImtR2Uj/view?usp=sharing" target="_blank" rel="noopener noreferrer">상세 리포트</a> · <a href="https://satellite-dashboard-h875.vercel.app/" target="_blank" rel="noopener noreferrer">대시보드</a>
 
 ![판독관 대시보드](report/images/dashboard_overview.png)
 
