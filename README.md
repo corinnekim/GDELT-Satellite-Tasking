@@ -6,6 +6,10 @@
 
 [Notion 포트폴리오](https://sweltering-crane-02b.notion.site/GDELT-LLM-2ec96d4e0a4983eab5ee818b605b3400) · [리포트](https://drive.google.com/file/d/1D5JI0_LX6yRbazqoyO4ce3ORcImtR2Uj/view?usp=sharing) · [대시보드](https://satellite-dashboard-h875.vercel.app/)
 
+![판독관 대시보드](report/images/dashboard_overview.png)
+
+좌측 촬영 타임라인과 도시별 위성 스케줄, 중앙 위험도 지도, 우측 선택 도시 상세 분석.
+
 ## 문제
 
 기존 방식은 판독관이 뉴스를 수동으로 모니터링해 위기 도시를 찾고, 좌표·기상·위성 궤도를 각각 다른 채널에서 확인한 뒤 촬영을 지시한다. 이 과정에 수 시간이 걸려 골든타임을 놓치는 일이 생긴다. 골든타임을 놓치는 이유는 위성 자원이 부족해서가 아니라 사건 인지에서 촬영 명령까지가 한 시스템으로 통합돼 있지 않기 때문이다. 이 시스템은 **사건·지리·기상·위성 궤도** 네 채널을 단일 파이프라인으로 통합해 촬영 후보를 자동 산출한다.
