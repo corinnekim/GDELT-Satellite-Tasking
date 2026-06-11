@@ -1,10 +1,8 @@
-"""
-ROI Top-5 우선순위 실험 — V4 Empirical Bayes / V5 EM Q,R / V6 Multivariate /
+"""ROI Top-5 robust Kalman 실험: V4 Empirical Bayes / V5 EM Q,R / V6 Multivariate /
 V7 BOCPD overlay / V8 Conformal threshold.
 
-베이스라인 V0(Gaussian Q=0.0001 R=1) 그리드서치 winner와 비교.
-
-평가: top-K=20 Recall on Train + Test, A/C tier 분리.
+베이스라인 V0(Gaussian Q=0.0001 R=1) 그리드서치 winner와 비교한다.
+평가는 top-K=20 Recall on Train + Test, A/C tier 분리.
 """
 from __future__ import annotations
 import json

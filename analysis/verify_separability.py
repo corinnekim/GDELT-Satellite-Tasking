@@ -1,8 +1,7 @@
-"""우선순위 2: 사건 vs 평시의 z-score 분리도.
+"""사건 vs 평시의 z-score 분리도.
 
-논리:
-  N(0,1) 정규성은 위반됐지만, ranking 능력은 별개.
-  ROC AUC, PR AUC, Youden's J 최적 threshold로 입증.
+N(0,1) 정규성은 위반됐지만 ranking 능력은 별개다.
+ROC AUC, PR AUC, Youden's J 최적 threshold로 입증한다.
 """
 import numpy as np
 from pathlib import Path

@@ -1,18 +1,11 @@
-"""우선순위 1: 평시 innovation z의 정규성 검증.
+"""평시 innovation z의 정규성 검증.
 
-논리:
-  Kalman은 H0(평시) = 가우시안 baseline → innovation z ~ N(0, 1)
-  H0 위반(사건) → z 이상치 = anomaly signal
+Kalman은 H0(평시) = 가우시안 baseline이므로 innovation z ~ N(0, 1)이고,
+H0 위반(사건)이면 z가 이상치로 튀어 anomaly signal이 된다.
 
-검증 절차:
-  1. 22-day train window (2/28 ~ 3/21) Kalman 전체 city-day 시계열 → std_innov 추출
-  2. (city, date) ∈ GT positives = 사건일, 그 외 = 평시
-  3. 평시 z 분포 vs N(0, 1) 적합도
-     - 히스토그램 + 정규분포 overlay
-     - QQ plot
-     - Shapiro-Wilk (n≤5000) or Anderson-Darling, KS test
-     - mean, std, skew, kurtosis
-  4. 결과 numpy + 그림 저장 + console summary
+22일 train window(2/28~3/21) Kalman 전체 city-day 시계열에서 std_innov를 뽑아
+GT positive(사건일)와 그 외(평시)로 나눈 뒤, 평시 z 분포가 N(0,1)에 맞는지
+히스토그램, QQ plot, KS/AD 검정으로 확인한다.
 """
 import numpy as np
 import pandas as pd
@@ -35,7 +28,7 @@ Q, R = 0.001, 10.0   # slow (production)
 
 
 def main():
-    print(f"[1/4] Loading GDELT...")
+    print("GDELT 로드")
     raw = pd.read_parquet(MAIN_PATH)
     raw['date'] = raw['SQLDATE'].astype(str).str[:8]
 
@@ -55,13 +48,13 @@ def main():
 
     print(f"      {len(agg):,} city-day rows, {agg['city'].nunique()} cities")
 
-    print(f"[2/4] Kalman filter (Q={Q}, R={R})...")
+    print(f"Kalman filter (Q={Q}, R={R})")
     res = agg.groupby('city', group_keys=False).apply(
         lambda x: apply_kalman_group(x, agg['date'].min(), agg['date'].max(), Q, R))
     res = res.dropna(subset=['std_innov']).reset_index(drop=True)
     print(f"      {len(res):,} std_innov values")
 
-    print(f"[3/4] GT positives + window filter...")
+    print("GT positives + window filter")
     gd = load_window_gdelt()
     positives = map_gt_to_positives(gd)
     res['gt'] = res.apply(lambda r: (r['date'], r['city']) in positives, axis=1)
@@ -74,36 +67,32 @@ def main():
     z_peace = res.loc[~res['gt'], 'std_innov'].to_numpy()
     z_event = res.loc[res['gt'],  'std_innov'].to_numpy()
 
-    # === peacetime stats ===
-    print("\n[4/4] Peacetime z-score 정규성 검정\n" + "─"*60)
+    print("\n평시 z-score 정규성 검정")
     print(f"{'metric':22s} {'value':>14s}   {'expected if N(0,1)':>22s}")
-    print("─"*60)
     print(f"{'n':22s} {len(z_peace):>14d}")
     print(f"{'mean':22s} {z_peace.mean():>14.4f}   {0:>22.4f}")
     print(f"{'std':22s} {z_peace.std():>14.4f}   {1:>22.4f}")
     print(f"{'skewness':22s} {stats.skew(z_peace):>14.4f}   {0:>22.4f}")
     print(f"{'kurtosis (excess)':22s} {stats.kurtosis(z_peace):>14.4f}   {0:>22.4f}")
-    # KS test against N(0, 1)
+    # N(0,1) 대비 KS 검정
     ks_stat, ks_p = stats.kstest(z_peace, 'norm', args=(0, 1))
     print(f"{'KS test stat':22s} {ks_stat:>14.4f}")
     print(f"{'KS test p-value':22s} {ks_p:>14.2e}   {'>0.05 = N(0,1)':>22s}")
-    # AD test
+    # AD 검정
     ad = stats.anderson(z_peace, dist='norm')
     print(f"{'AD stat':22s} {ad.statistic:>14.4f}")
     print(f"{'AD critical (5%)':22s} {ad.critical_values[2]:>14.4f}   {'stat<crit = N':>22s}")
-    print("─"*60)
 
-    print(f"\n[event vs peace]")
+    print("\n사건 vs 평시")
     print(f"  peacetime z   range:  {z_peace.min():.2f} … {z_peace.max():.2f}  (mean={z_peace.mean():.3f})")
     print(f"  event   z     range:  {z_event.min():.2f} … {z_event.max():.2f}  (mean={z_event.mean():.3f})")
     print(f"  > 3σ peace fraction:  {(np.abs(z_peace) > 3).mean()*100:.2f}%   (theory: 0.27%)")
     print(f"  > 3σ event fraction:  {(np.abs(z_event) > 3).mean()*100:.2f}%")
 
-    # === plots ===
-    print(f"\n[plots] saving...")
+    print("\n그림 저장")
     fig, axes = plt.subplots(1, 3, figsize=(15, 4.5))
 
-    # (a) histogram + N(0,1)
+    # (a) 히스토그램 + N(0,1)
     ax = axes[0]
     ax.hist(z_peace, bins=80, density=True, alpha=0.55, color='#5fdfa8', label=f'평시 (n={len(z_peace):,})', edgecolor='none')
     xs = np.linspace(-5, 5, 200)
@@ -137,7 +126,7 @@ def main():
     plt.close()
     print(f"      saved: {fig_path}")
 
-    # save raw arrays
+    # 배열 저장
     np.savez(OUT / 'innovation_arrays.npz', z_peace=z_peace, z_event=z_event,
              ks_stat=ks_stat, ks_p=ks_p, ad_stat=ad.statistic, ad_crit5=ad.critical_values[2])
     print(f"      saved: {OUT / 'innovation_arrays.npz'}")

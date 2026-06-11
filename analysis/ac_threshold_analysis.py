@@ -1,22 +1,15 @@
-"""
-A/C/D tier threshold analysis over the 22-day train window (2026-02-28 to 2026-03-21).
+"""22일 train window(2026-02-28 ~ 03-21) A/C/D tier 임계값 분석.
 
-Baseline per standard_name:
-  - days_present   : number of distinct dates with ≥1 GDELT row
-  - sum_mentions   : total NumMentions over window
-  - avg_mentions_per_day_active  : mean per active day (excludes zero days)
-  - n_events       : total rows
+도시(standard_name)별 baseline:
+  days_present        : GDELT 행이 1개 이상 있던 distinct 날짜 수
+  sum_mentions        : window 동안 NumMentions 합
+  avg_mentions_active : 활동일 기준 평균 (0인 날 제외)
+  n_events            : 전체 행 수
 
-A/C split logic ('major vs minor'):
-  - A (major/active) : frequently and widely reported
-  - C (minor)        : rarely/sparsely reported (rare-spike candidates)
-  - D                : GT city not present in GDELT window → transparency (excluded from recall)
-
-GT mapping:
-  - Each GT entry's (city, lat, lon) is mapped to a standard_name via:
-    (a) name-exact match on _norm() against GDELT {FullName, standard_name}
-    (b) geo: dominant standard_name within 30km (≥60% of mentions)
-    (c) else D-tier
+A는 자주 넓게 보도되는 주요 거점, C는 드물게 잡히는 소규모 거점,
+D는 GDELT window에 없는 GT 도시(recall에서 제외)로 나눈다.
+GT의 (city, lat, lon)은 이름 정확매칭, 30km 내 지배적 standard_name(멘션 60% 이상),
+둘 다 실패 시 D로 매핑한다.
 """
 from pathlib import Path
 import numpy as np
@@ -74,15 +67,15 @@ def per_city_stats(gdelt):
 
 
 def map_gt_to_standard(gdelt):
-    """Returns: list of dicts per GT entry with standard_name (or None for D)."""
-    # Index: norm key (both FullName and standard_name are candidates)
+    """GT 항목별 standard_name 매핑 (매칭 실패 시 None=D)."""
+    # 이름 정규화 키 인덱스 (FullName, standard_name 둘 다 후보)
     name_to_std = {}
     for _, r in gdelt[['ActionGeo_FullName', 'standard_name']].drop_duplicates().iterrows():
         name_to_std[_norm(r['ActionGeo_FullName'])] = r['standard_name']
         name_to_std[_norm(r['standard_name'])] = r['standard_name']
     name_to_std.pop('', None)
 
-    # Precompute mentions per (date, standard_name) → for geo-dominance checks we use window totals
+    # geo 지배도 판정용 standard_name별 window 멘션 합
     std_mentions = gdelt.groupby('standard_name')['NumMentions'].sum().to_dict()
 
     rows = []
@@ -127,9 +120,9 @@ def map_gt_to_standard(gdelt):
 
 
 def propose_thresholds(stats, gt_df):
-    """Print A/C threshold candidates."""
+    """A/C 임계값 후보 출력."""
     total_days = 22
-    print("\n=== GDELT city baseline distribution (22-day window) ===")
+    print("\nGDELT city baseline 분포 (22일)")
     print(f"Cities total: {len(stats)}")
     for cut in [1, 2, 3, 5, 8, 11, 15, 20]:
         n = (stats.days_present >= cut).sum()
@@ -138,24 +131,24 @@ def propose_thresholds(stats, gt_df):
     print("\navg_mentions_active distribution:")
     print(stats.avg_mentions_active.describe().to_string())
 
-    # GT-anchored view
+    # GT 기준 분포
     gt_cities = gt_df.dropna(subset=['standard_name']).standard_name.unique()
     d_entries = gt_df[gt_df.standard_name.isna()]
-    print(f"\n=== GT coverage ===")
+    print("\nGT coverage")
     print(f"  Unique GT standard_names matched: {len(gt_cities)}")
     print(f"  GT entries D-tier (no GDELT): {len(d_entries)}")
     print(gt_df['match_type'].value_counts().to_string())
 
-    # Check where GT cities fall in baseline
+    # GT 도시가 baseline 어디에 위치하는지
     gt_stats = stats[stats.standard_name.isin(gt_cities)].copy()
     non_gt_stats = stats[~stats.standard_name.isin(gt_cities)]
-    print(f"\n=== GT cities baseline stats (n={len(gt_stats)}) ===")
+    print(f"\nGT cities baseline stats (n={len(gt_stats)})")
     print(gt_stats[['days_present', 'avg_mentions_active', 'sum_mentions']].describe().to_string())
-    print(f"\n=== Non-GT cities (n={len(non_gt_stats)}) ===")
+    print(f"\nNon-GT cities (n={len(non_gt_stats)})")
     print(non_gt_stats[['days_present', 'avg_mentions_active', 'sum_mentions']].describe().to_string())
 
-    # Candidate A/C boundary sweeps
-    print("\n=== A/C threshold sweep ===")
+    # A/C 경계 후보 sweep
+    print("\nA/C threshold sweep")
     print("criterion: A if (days_present ≥ D) AND (avg_mentions_active ≥ M)")
     print(f"{'D':>3}  {'M':>5}  {'A-cities':>9}  {'C-cities':>9}  {'GT in A':>8}  {'GT in C':>8}")
     for D in [3, 5, 8, 11]:
@@ -168,19 +161,19 @@ def propose_thresholds(stats, gt_df):
 
 
 def main():
-    print(f"[1/3] Loading GDELT {WIN_START}–{WIN_END}...")
+    print(f"GDELT 로드 {WIN_START}~{WIN_END}")
     g = load_window_gdelt()
     dates = sorted(g.date.unique())
     print(f"      {len(g):,} rows, {len(dates)} days ({dates[0]} .. {dates[-1]})")
     if len(dates) != 22:
-        print(f"      [WARN] expected 22 days, got {len(dates)}")
+        print(f"      경고: 22일 기대, {len(dates)}일")
 
-    print("[2/3] Per-standard_name stats...")
+    print("standard_name별 통계")
     stats = per_city_stats(g)
     stats.to_csv(OUT_CITY, index=False)
     print(f"      saved {OUT_CITY}")
 
-    print("[3/3] GT mapping to standard_name...")
+    print("GT를 standard_name에 매핑")
     gt_df = map_gt_to_standard(g)
     gt_df.to_csv(OUT_GT, index=False)
     print(f"      saved {OUT_GT}")
