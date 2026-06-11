@@ -66,7 +66,7 @@ def build_features(filtered: pd.DataFrame, positives: set,
       - dow
 
     Optional: kalman_std_innov_t (Kalman 표준화 이노베이션, 시점 t에서 online filter 출력)
-              — 미래 정보 사용 없음 (online), Q·R은 §6.5.3 운영 파라미터로 GT-tune 됐음 (이 한계는 누출 논의에서 다룸)
+              미래 정보 사용 없음 (online), Q, R은 §6.5.3 운영 파라미터로 GT-tune 됐음 (이 한계는 누출 논의에서 다룸)
     """
     print("   building base city-day features (raw GDELT signals)...")
     filtered = filtered.copy()
@@ -224,14 +224,14 @@ def bootstrap_auc_ci(y, s, n_boot=1000, seed=0):
 
 
 def main():
-    print("[1/6] Loading + preprocessing data...")
+    print("데이터 로드 + 전처리")
     raw = pd.read_parquet(MAIN_PATH)
     raw['date'] = raw['SQLDATE'].astype(str).str[:8]
     f = clean_gdelt_data(raw)
     f = apply_standard_scaling(f, is_train=False)
     print(f"   filtered rows: {len(f):,}")
 
-    print("\n[2/6] GT positives mapping...")
+    print("\nGT positives 매핑")
     gt = load_gt(GT_DIR)
     positives = set()
     cities_set = set(f['standard_name'].unique())
@@ -243,7 +243,7 @@ def main():
                 positives.add((row['date'], city))
     print(f"   positives: {len(positives)} (date, city) pairs")
 
-    print("\n[3/6] Computing Kalman std_innov (online filter, Q=0.001 R=10 per §6.5.3)...")
+    print("\nKalman std_innov 계산 (online filter, Q=0.001 R=10)")
     f['Log_Sources_raw'] = np.log1p(f['NumSources'])
     agg_k = (f.groupby(['date', 'standard_name'])
              .agg(conflict_index=('Log_Sources_raw', 'sum'))
@@ -259,7 +259,7 @@ def main():
         kalman_outputs[city] = std_innov
     print(f"   computed for {len(kalman_outputs)} cities")
 
-    print("\n[4/6] Building rich feature matrix (39 raw GDELT + 1 Kalman std_innov)...")
+    print("\nfeature matrix 구성 (39 raw GDELT + 1 Kalman std_innov)")
     df = build_features(f, positives, kalman_outputs)
     train, evalw = time_split(df)
     print(f"\n   train rows: {len(train):,} (pos {train['target'].sum()})")
@@ -287,12 +287,12 @@ def main():
     print(f"\n   base features:   {len(feats_base)}  (raw GDELT only)")
     print(f"   hybrid features: {len(feats_hybrid)}  (+ Kalman std_innov)")
 
-    print(f"\n[5/6] Training LightGBM (TimeSeriesSplit 5-fold CV → final test eval)...")
+    print("\nLightGBM 학습 (TimeSeriesSplit 5-fold CV, final test eval)")
     models = {}
     results = {}
     train_sorted = train.sort_values('date_str').reset_index(drop=True)
     for label, feats in [('base', feats_base), ('hybrid', feats_hybrid)]:
-        print(f"\n   === {label} ({len(feats)} features) ===")
+        print(f"\n   {label} ({len(feats)} features)")
 
         # ── 5-fold TimeSeriesSplit CV within train window ──
         tscv = TimeSeriesSplit(n_splits=5)
@@ -342,7 +342,7 @@ def main():
             's_te': s_te.tolist(), 'y_te': y_te.tolist(),
         }
 
-    print(f"\n[6/6] Visualization...")
+    print("\n시각화")
     fig, axes = plt.subplots(1, 2, figsize=(15, 5))
     # ROC
     ax = axes[0]

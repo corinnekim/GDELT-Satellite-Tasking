@@ -68,8 +68,8 @@ def main():
     out[['ActionGeo_FullName','ActionGeo_CountryCode','n_mentions',
          'standard_name','flag','note']].to_csv(OUT_PATH, index=False)
 
-    print(f'Flagged {len(out)} suspicious entries → {OUT_PATH}')
-    print('\n=== TOP 30 by mentions ===')
+    print(f'Flagged {len(out)} suspicious entries, saved {OUT_PATH}')
+    print('\nTOP 30 by mentions')
     print(out[['ActionGeo_FullName','ActionGeo_CountryCode','n_mentions',
                'standard_name','flag','note']].head(30).to_string(index=False))
 

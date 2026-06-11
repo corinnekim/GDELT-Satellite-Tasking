@@ -129,7 +129,7 @@ def diversity_stats(scored, score_col, dates, k=TOPK):
 
 
 def main():
-    print("[1/6] conflict_index 계산")
+    print("conflict_index 계산")
     raw = pd.read_parquet(MAIN_PATH)
     city_daily, f = compute_conflict_index(raw, is_train=False)
     print(f"   city_daily rows: {len(city_daily):,}, cities: {city_daily['city'].nunique():,}")
@@ -160,7 +160,7 @@ def main():
                                 lambda s: s.mode().iloc[0] if len(s.mode()) else np.nan))
                .reset_index().rename(columns={'standard_name': 'city', 'date': 'date_str'}))
 
-    print("[2/6] GT 라벨 생성")
+    print("GT 라벨 생성")
     positives = set()
     for d in sorted(gt_df_all['date'].unique()):
         daily_gt = gt_df_all[gt_df_all['date'] == d]
@@ -175,7 +175,7 @@ def main():
               .rename(columns={'date': 'date_str', 'std_innov': 'score_kalman'}))
     kal_df = kal_df[(kal_df['date_str'] >= TEST_START) & (kal_df['date_str'] <= TEST_END)]
 
-    print("[3/6] ARIMA 적합")
+    print("ARIMA 적합")
     # ARIMA 입력: production conflict_index 시계열
     fit_targets = []
     series_by_city = {}
@@ -207,7 +207,7 @@ def main():
     arima_df = pd.DataFrame(arima_rows, columns=['date_str', 'city', 'score_arima'])
     print(f"   ARIMA fitted: {n_ok}/{len(fit_targets)}")
 
-    print("[4/6] ML feature + 튜닝")
+    print("ML feature + 튜닝")
     feat_df = build_features(f, positives, static_until_date=TEST_START)
     train, evalw = time_split(feat_df)
     cmean = train.groupby('country_code')['target'].mean().to_dict()
@@ -251,7 +251,7 @@ def main():
     evalw['score_xgb'] = xgb_proba
     evalw['score_rf'] = rf_proba
 
-    print("[5/6] 지표 계산")
+    print("지표 계산")
     blocks = [
         score_block('Kalman', 'score_kalman', evalw, cd_meta, evaluator, test_dates),
         score_block('ARIMA(auto)', 'score_arima', evalw, cd_meta, evaluator, test_dates),
@@ -279,7 +279,7 @@ def main():
                   'arima_median': float(pc_df['arima_auc'].median()),
                   'kalman_wins_margin5': kw, 'arima_wins_margin5': aw, 'ties': len(pc_df) - kw - aw}
 
-    print("[6/6] top-20 다양성")
+    print("top-20 다양성")
     div = {}
     div['Kalman'] = diversity_stats(evalw, 'score_kalman', test_dates)
     for nm, col in [('LightGBM', 'score_lgb'), ('XGBoost', 'score_xgb'), ('RandomForest', 'score_rf')]:

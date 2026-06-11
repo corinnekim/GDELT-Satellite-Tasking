@@ -37,7 +37,7 @@ def haversine(la1, lo1, la2, lo2):
 
 
 def main():
-    print(f"[1/3] GDELT 로딩 ({GDELT_PATH.name})")
+    print(f"GDELT 로딩 ({GDELT_PATH.name})")
     df = pd.read_parquet(GDELT_PATH)
     df = df[df.ActionGeo_CountryCode.isin(MONITORED_COUNTRIES)]
     df = df[df.ActionGeo_Type == 4]
@@ -51,7 +51,7 @@ def main():
     g['nkey'] = g.ActionGeo_FullName.apply(_norm)
     print(f"      GDELT 후보 (FullName, country): {len(g):,}")
 
-    print(f"[2/3] GeoNames 로딩 ({GN_PATH.name})")
+    print(f"GeoNames 로딩 ({GN_PATH.name})")
     gn = pd.read_parquet(GN_PATH)
     gn = gn.dropna(subset=['lat', 'lon', 'country']).copy()
     gn['nkey'] = gn.name.fillna('').apply(_norm)
@@ -59,7 +59,7 @@ def main():
     gn_P = gn[(gn.fclass == 'P') & (gn.population >= MIN_POP_THRESHOLD)]
     print(f"      GeoNames P-fclass, pop≥{MIN_POP_THRESHOLD}: {len(gn_P):,}")
 
-    print(f"[3/3] 의심 케이스 탐지 (>{DIST_THRESHOLD_KM:.0f}km)")
+    print(f"의심 케이스 탐지 (>{DIST_THRESHOLD_KM:.0f}km)")
     url_df = pd.read_parquet(URL_PATH) if URL_PATH.exists() else None
 
     rows = []
