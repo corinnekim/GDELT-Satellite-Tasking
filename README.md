@@ -1,15 +1,12 @@
 # GDELT 시계열 이상 탐지와 LLM 검증을 활용한 위성 촬영 스케줄링 자동화 대시보드
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?style=for-the-badge&logo=duckdb&logoColor=black)
-![BigQuery](https://img.shields.io/badge/BigQuery-669DF6?style=for-the-badge&logo=googlebigquery&logoColor=white)
-![statsmodels](https://img.shields.io/badge/statsmodels-3F51B5?style=for-the-badge)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
-![Kalman Filter](https://img.shields.io/badge/Kalman_Filter-006D77?style=for-the-badge)
-![Gemini API](https://img.shields.io/badge/Gemini_API-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)
-![Skyfield](https://img.shields.io/badge/Skyfield-1B2A4A?style=for-the-badge)
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?style=flat-square&logo=duckdb&logoColor=black)
+![BigQuery](https://img.shields.io/badge/BigQuery-669DF6?style=flat-square&logo=googlebigquery&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
+![Gemini API](https://img.shields.io/badge/Gemini_API-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 
 분쟁 지역의 군사 사건은 위성 영상으로 평가한다. 그런데 폭격 흔적이나 장비 위치 같은 물리적 증거는 적의 은폐·위장·잔해 정리로 빠르게 사라져, 이 짧은 관측 가능 구간(골든타임) 안에 위성 영상을 확보해야 한다. 이 프로젝트는 어떤 도시를 언제, 어떤 위성으로 찍을지 자동으로 산출해 판독관의 신속한 촬영 의사결정을 돕는 시스템이다.
 
@@ -75,11 +72,12 @@ eda.ipynb         데이터 EDA (노이즈 구조·변수 분포·conflict_index
 |---|---|
 | 전처리 | `preprocess.py` · `gdelt_fetcher.py` · `event_dedup.py` |
 | 지명 표준화 | `text_norm.py` · `city_utils.py` · `roi_cities.py` |
-| 칼만 이상 탐지 | `kalman_filter.py` |
+| 칼만 필터 | `kalman_filter.py` |
 | LLM 검증 | `llm_verification.py` · `cache.py` |
 | 위성 스케줄링 | `satellite_catalog.py` · `tle_fetcher.py` · `pass_predictor.py` · `weather_checker.py` · `schedule_builder.py` |
 | 대시보드 출력 | `daily_json_writer.py` |
-| 오케스트레이션 | `run_pipeline.py` · `config.py` |
+| 파이프라인 실행 | `run_pipeline.py` |
+| 설정 | `config.py` |
 
 ## 기술 스택
 
@@ -87,7 +85,7 @@ Python · pandas · Polars · DuckDB · BigQuery · statsmodels · scikit-learn 
 
 ## 실행
 
-GDELT 원본 데이터와 Gemini API
+GDELT 원본 데이터와 Gemini API · OPEN-Meteo API가 필요하다.
 
 ```bash
 python -m pipeline.run_pipeline --date 20260228 --mode backtest --save
