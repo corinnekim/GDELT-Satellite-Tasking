@@ -12,9 +12,9 @@ build/
 # 문서
 *.docx
 *.pdf
-gdelt-report.md
 notes.md
 CLAUDE.md
+report/
 
 # 대용량/원본 데이터
 data/raw/
