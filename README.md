@@ -9,7 +9,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 
 
-### <a href="https://sweltering-crane-02b.notion.site/GDELT-LLM-2ec96d4e0a4983eab5ee818b605b3400" target="_blank" rel="noopener noreferrer">노션 포트폴리오</a> | <a href="https://satellite-dashboard-h875.vercel.app/" target="_blank" rel="noopener noreferrer">대시보드 바로가기</a> | <a href="https://drive.google.com/file/d/1D5JI0_LX6yRbazqoyO4ce3ORcImtR2Uj/view?usp=sharing" target="_blank" rel="noopener noreferrer">상세 기술 리포트</a>
+### <a href="https://sweltering-crane-02b.notion.site/GDELT-LLM-1c696d4e0a4983499d8c81913fb536f4?pvs=74" target="_blank" rel="noopener noreferrer">노션 포트폴리오</a> | <a href="https://satellite-dashboard-h875.vercel.app/" target="_blank" rel="noopener noreferrer">대시보드 바로가기</a> | <a href="https://drive.google.com/file/d/1D5JI0_LX6yRbazqoyO4ce3ORcImtR2Uj/view?usp=sharing" target="_blank" rel="noopener noreferrer">상세 기술 리포트</a>
 
 ## 요약
 
